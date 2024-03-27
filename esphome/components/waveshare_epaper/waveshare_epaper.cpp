@@ -2232,29 +2232,35 @@ void WaveshareEPaper7P5In::initialize() {
   this->command(0xE5);
   this->data(0x03);
 }
+
 void HOT WaveshareEPaper7P5In::display() {
   // COMMAND DATA START TRANSMISSION 1
   this->command(0x10);
   this->start_data_();
-  for (size_t i = 0; i < this->get_buffer_length_(); i++) {
+  for (size_t i = 0; i < (this->get_buffer_length_() / 2); i++) {
     uint8_t temp1 = this->buffer_[i];
+    uint8_t temp2 = this->buffer_[i + (this->get_buffer_length_() / 2)];
     for (uint8_t j = 0; j < 8; j++) {
-      uint8_t temp2;
-      if (temp1 & 0x80) {
-        temp2 = 0x03;
-      } else {
-        temp2 = 0x00;
-      }
-      temp2 <<= 4;
+      uint8_t temp3;
+      if ((temp2 & 0x80) != 0x80)
+        temp3 = 0x04; // Red
+      else if (temp1 & 0x80)
+        temp3 = 0x03; // White
+      else
+        temp3 = 0x00; // Black
+      temp3 <<= 4;
       temp1 <<= 1;
+      temp2 <<= 1;
       j++;
-      if (temp1 & 0x80) {
-        temp2 |= 0x03;
-      } else {
-        temp2 |= 0x00;
-      }
+      if ((temp2 & 0x80) != 0x80)
+        temp3 |= 0x04; // Red
+      else if (temp1 & 0x80)
+        temp3 |= 0x03; // White
+      else
+        temp3 |= 0x00; // Black
       temp1 <<= 1;
-      this->write_byte(temp2);
+      temp2 <<= 1;
+      this->write_byte(temp3);
     }
     App.feed_wdt();
   }
@@ -2262,6 +2268,7 @@ void HOT WaveshareEPaper7P5In::display() {
   // COMMAND DISPLAY REFRESH
   this->command(0x12);
 }
+
 int WaveshareEPaper7P5In::get_width_internal() { return 640; }
 int WaveshareEPaper7P5In::get_height_internal() { return 384; }
 void WaveshareEPaper7P5In::dump_config() {
@@ -2566,20 +2573,30 @@ void HOT WaveshareEPaper7P5InBC::display() {
   // COMMAND DATA START TRANSMISSION 1
   this->command(0x10);
   this->start_data_();
-
-  for (size_t i = 0; i < this->get_buffer_length_(); i++) {
-    // A line of eight source pixels (each a bit in this byte)
-    uint8_t eight_pixels = this->buffer_[i];
-
-    for (uint8_t j = 0; j < 8; j += 2) {
-      /* For bichromatic displays, each byte represents two pixels. Each nibble encodes a pixel: 0=white, 3=black,
-      4=color. Therefore, e.g. 0x44 = two adjacent color pixels, 0x33 is two adjacent black pixels, etc. If you want
-      to draw using the color pixels, change '0x30' with '0x40' and '0x03' with '0x04' below. */
-      uint8_t left_nibble = (eight_pixels & 0x80) ? 0x30 : 0x00;
-      eight_pixels <<= 1;
-      uint8_t right_nibble = (eight_pixels & 0x80) ? 0x03 : 0x00;
-      eight_pixels <<= 1;
-      this->write_byte(left_nibble | right_nibble);
+  for (size_t i = 0; i < (this->get_buffer_length_() / 2); i++) {
+    uint8_t temp1 = this->buffer_[i];
+    uint8_t temp2 = this->buffer_[i + (this->get_buffer_length_() / 2)];
+    for (uint8_t j = 0; j < 8; j++) {
+      uint8_t temp3;
+      if ((temp2 & 0x80) != 0x80)
+        temp3 = 0x04; // Red
+      else if (temp1 & 0x80)
+        temp3 = 0x03; // White
+      else
+        temp3 = 0x00; // Black
+      temp3 <<= 4;
+      temp1 <<= 1;
+      temp2 <<= 1;
+      j++;
+      if ((temp2 & 0x80) != 0x80)
+        temp3 |= 0x04; // Red
+      else if (temp1 & 0x80)
+        temp3 |= 0x03; // White
+      else
+        temp3 |= 0x00; // Black
+      temp1 <<= 1;
+      temp2 <<= 1;
+      this->write_byte(temp3);
     }
     App.feed_wdt();
   }
