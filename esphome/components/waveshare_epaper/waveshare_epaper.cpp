@@ -2237,9 +2237,9 @@ void HOT WaveshareEPaper7P5In::display() {
   // COMMAND DATA START TRANSMISSION 1
   this->command(0x10);
   this->start_data_();
-  for (size_t i = 0; i < (this->get_buffer_length_() / 2); i++) {
+  for (size_t i = 0; i < this->get_buffer_length_(); i++) {
     uint8_t temp1 = this->buffer_[i];
-    uint8_t temp2 = this->buffer_[i + (this->get_buffer_length_() / 2)];
+    uint8_t temp2 = this->buffer_[i + this->get_buffer_length_()];
     for (uint8_t j = 0; j < 8; j++) {
       uint8_t temp3;
       if ((temp2 & 0x80) != 0x80)
@@ -2573,9 +2573,9 @@ void HOT WaveshareEPaper7P5InBC::display() {
   // COMMAND DATA START TRANSMISSION 1
   this->command(0x10);
   this->start_data_();
-  for (size_t i = 0; i < (this->get_buffer_length_() / 2); i++) {
+  for (size_t i = 0; i < this->get_buffer_length_(); i++) {
     uint8_t temp1 = this->buffer_[i];
-    uint8_t temp2 = this->buffer_[i + (this->get_buffer_length_() / 2)];
+    uint8_t temp2 = this->buffer_[i + this->get_buffer_length_()];
     for (uint8_t j = 0; j < 8; j++) {
       uint8_t temp3;
       if ((temp2 & 0x80) != 0x80)
